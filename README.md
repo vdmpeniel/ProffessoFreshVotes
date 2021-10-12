@@ -1,2 +1,2 @@
 # ProffessoFreshVotes
-Hands-on project
+Hands-on Project from proffesso.com 

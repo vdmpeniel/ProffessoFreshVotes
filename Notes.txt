@@ -1,0 +1,351 @@
+PROFFESSO! 
+Java App from scratch "FreshVotes"
+	- mini reddit
+	- upvotes/downvotes
+	- features
+
+Requirements Outline:
+	How do I even start?
+	
+	A business owner can create a page which allows visitors to
+	recommend new features to the business owners app.
+
+	Visitors can review the pages that the business owner shares
+
+	Visitors can up/downvote features that have been recommended.
+
+	The number of up/down votes should be limited per visitor & page
+
+	The recommended features should allow for a title+ description and other
+	visitors should be allowed to leave comments on each recommended feature
+	Business owners should be allowed to comment on these features as well.
+
+	Business Owners should be able to mark features with a status (
+	closed, considering, planned, in progress, etc)
+	
+	------------------------------
+
+	- First underline the nouns
+
+	Business Owner
+	Page
+	Visitors
+	Features
+	Business Owner's App
+	Visitors
+	Pages
+	Business Owner
+	Visitors
+	Features
+	Visitor
+	Page
+	Features
+	Title & Description
+	Visitors
+	Comments
+	Feature
+	Features
+	Features
+	Status
+	
+
+	- Then de-plurarize (from plural to single)
+	Count the nouns that are going to be our future entities	
+
+Database Schema part1
+	We have the following entities:
+	Business Owner
+	Page
+	Visitor
+	Feature
+	Title
+	Description
+	Comment
+	Status
+	Vote
+
+Not all nouns are going to be entity tables
+Some are going to be properties of those tables
+
+- Business Owner and Visitor are USERs of our system
+they just represent different roles 
+(related to Authorization)
+
+User is usually a reserved word so we are going to use the word "users"
+
+We don't create a table for the word "page" as it represent 
+our project itself and it represent all the features
+in the requirements. It is how we represent our data.
+
+- Title and description:
+	A FEATURE has a title and description
+	Meaning that title and description are properties of
+	"Features"
+
+- Comment: 
+	Features have  comments but comments are not properties
+	of features. Comments are made ON features.
+
+	A feature can have many comments made by multiple users
+
+	Comment can be a table of its own
+
+	Design can change, it is not set in stone
+
+- Status: is a property that can have different values
+	A status describes the state of a feature so it is a property of a feature
+
+- Vote:  can be cast by visitors on features.
+it represents a relationship between those two tables
+	
+
+Entities created:
+
+Feature:
+	properties:
+		id
+		title
+		description
+		status
+		
+	many users can leave many comments on many features
+user:
+	can create a comment for many features
+	can up/down vote on features
+	Properties:
+		id
+		name
+		password
+		username
+		role
+comment:
+	pertains to a feature
+	made by a user
+	properties: 
+		id = user_id + feature_id
+		text
+		user_id (foreing key 1 to * many relationship (a user comments))
+		feature_id (foreing key 1 to * many relationship (a feature is commented))
+	one to many join table with features and users
+vote:
+	cast by a user
+	on a feature
+	joins those towo tables with a many to many relationship
+	property: 
+		id = user_id + feature_id
+		upvote
+		user_id (foreing key 1 to * many relationship (a user votes))
+		feature_id (foreing key 1 to * many relationship (a feature is up/downvoted))
+--------------------------------------
+There are three types of relationships:
+	one to one --- doesn't require a join table
+	one to many --- """""""""""""""""""""""""""
+	many to many -- requires a join table
+
+Get a solution that are good enough, and make it work
+see what happens and redesign as needed
+
+There is never just one solution. Best guest and if it feels good go for it
+you can always change the design later
+
+----------------------------------------
+Database Schema Part 2
+In dabase design a good idea is to get rid of nulls
+that is why we don't convine votes and comments in one table
+
+-----------------------------------------
+Creating a Github Repository:
+	-Go to github click the + sybol on the top right
+	-Enter a project name
+	-Make it public
+	-Select a license
+	-Include a readme file
+
+	-Hit create repository
+	-In the repository click on clone or download
+	-Copy the clone url
+	
+	-In a new folder open git batch
+	And do git clone <URL>
+
+	Or
+
+
+	Go to https://start.spring.io/ and generate
+	a project with JPA, Web, devTools, MySQL, security, thymeleaf and web
+
+	This can be done with "spring tool suit" (a version of eclipse) as well
+
+	To set Git follow this:
+		https://www.jetbrains.com/help/idea/set-up-a-git-repository.html#clone-repo
+
+
+	-------------------------------------------
+	Sourcetree is a software that can be used to do git 
+	visually.
+----------------------------------------------
+Associating Git Repo with Code:
+	Thymeleaf uses HTML instead of JPSs which are in desuse
+	It allows a better collaboration with designers for instance
+
+	Window >> Show View >> other --> type >> Git Repository
+	In github copy the repo url and paste it in the repo view
+
+	right click on the project explorer and select team >> share project >> select repo >> finish
+	Select files, add message and commit/push.
+	
+----------------------------------------------
+Entity Creation Part 1
+	Check code in project
+	
+	Having a blank application.properties file will cause an error
+	"Failed to configure a DataSource: 'url' attribute is not embedded datasource could be configured"
+	
+	In application properties file put:
+
+	spring.datasource.url = jdbc:mysql://localhost:3306
+	spring.datasource.driverClassName = com.mysql.jdbc.Driver  *** This is deprecated, the new driver is com.mysql.cj.jdbc.Driver
+	spring.datasource.username = sample_user
+	spring.datasource.password = password
+	
+	spring.jpa.database-platform = org.hibernate.dialect.MySQL57 Dialect
+	spring.jpa.show-sql = true
+	spring.jpa.hibernate.dll-auto = update
+
+	string.thymeleaf.cache = false
+
+
+	*** We need to create a mySQL database
+
+	Go to https://www.mysql.com/
+	Install it and set up a new user
+	In this case: freshVoteApp
+	With password: --AppPassword
+
+	The @GeneratedValue(strategy=generationType.IDENTITY)
+	auto generates ids by auto incrementing
+
+	To know more about the spring.jpa.hibernate.dll-auto options see:
+	https://stackoverflow.com/questions/42135114/how-does-spring-jpa-hibernate-ddl-auto-property-exactly-work-in-spring
+	https://docs.spring.io/spring-boot/docs/1.1.0.M1/reference/html/howto-database-initialization.html
+
+---------------------------------------------------
+Entity Creation Part 2
+	The usage of @Embeddable:
+	https://www.baeldung.com/jpa-embedded-embeddable
+
+	@Embeddable allows to embed a class in another class's table
+	
+	Check this: www.java2s.com/Tutorials/Java/JPA/0640_JPA_EmbeddedID.htm
+ 
+	**If you put your annotations on your getters and setters you need to keep it 
+	coherent. Always do so.
+
+	
+	*** Problem with intelliJ
+		Up to here I am able to run maven clean package install, but when runing the app
+		it shuts down immediatly:
+		With messages:
+		2021-10-09 10:53:30.644  INFO 26712 --- [       Thread-7] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+		2021-10-09 10:53:30.649  INFO 26712 --- [       Thread-7] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+		2021-10-09 10:53:30.661  INFO 26712 --- [       Thread-7] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+
+		Let's try with Spring Tools Suite
+		https://github.com/spring-projects/sts4/wiki/Installation	
+
+		Also let us clone the Proffesso (Trevor Page) code from his repo
+		https://github.com/tp02ga/FreshVotes
+
+		
+	In Eclipse:
+		ERROR module jdk.compiler does not "opens com.sun.tools.javac.processing" to unnamed module
+		is solved like this:
+			Right Click on your project
+			Go to Maven>Update Project
+			Check the Force Update of Snapshots/Releases Checkbox
+			Click Ok
+
+		https://stackoverflow.com/questions/68330987/module-jdk-compiler-does-not-opens-com-sun-tools-javac-processing-to-unnamed-m
+
+	Let's try to install spring tool suite 
+	https://spring.io/tools
+	- download and double click to unpack (or simply unpack with 7zip)
+
+	start by executing SpringToolSuite4
+	in file >> spring project starter - create a new project - select all required components
+
+	Has to add :
+	<dependency>
+		<groupId>mysql</groupId>
+		<artifactId>mysql-connector-java</artifactId>
+		<scope>runtime</scope>
+	</dependency>
+		
+	to the pom.
+
+	It is working now. Meaning the error above is solved, but the app is not making any change 
+	to DB
+ 
+	In MySQL Workbench let us create a new user:
+	CREATE USER 'freshVotesApp'@'localhost' IDENTIFIED BY '--AppPassword';
+		CREATE USER 'app'@'%' IDENTIFIED BY '--AppPassword';
+	GRANT ALL PRIVILEGES ON features TO 'app'@'%' WITH GRANT OPTION;
+
+	Let us create a schema:
+	CREATE SCHEMA `features` DEFAULT CHARACTER SET utf8;
+
+
+	To remove a user:
+	DROP USER 'freshVotesApp';
+------------------------------------------------	
+Using sourcetree for version Control
+	go to sourcetree.com and download the 
+	app for windows
+
+	then you can connect your repo to the software
+	
+	File >> open >> enter the path to the folder/select the folder	
+	
+	Select the files you want to stage
+
+	-- Branching methology:
+		Master goes to production
+
+		Feature branches are dedicated to developing
+
+-------------------------------------------------
+Creating Our First Controller
+	in STS4 go to the code exlorer ... 
+	>> filter and select exclude closed projects from the view
+
+	Having spring secutity in pom makes the app
+	take us to a login page when we hit an endpoint
+
+-------------------------------------------------
+Getting Started with Spring Security
+	Research this 
+	It allows for a user login screen
+	Also Helps with the app security of the app
+	
+	It secures by default all endpoints
+	that is why it shows login at all endpoints
+	
+	Authentication means: Who are you? Prove it
+
+	Authorization:
+
+
+---------------------------------------------------
+From Research:
+	When creating a controller:
+
+	If we use @RestController
+
+	we can do 
+	@GetMapping(value="/ping")
+	@ResponseBody
+
+	And respond with Json or any string
+
+
+
